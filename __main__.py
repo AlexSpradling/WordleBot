@@ -156,8 +156,8 @@ def update_word_list(current_guess, feedback, word_list):
     return new_word_list
 
 
-guess_list_path = ("wordlebot/word_lists/officialguesses.js" )
-answer_list_path = ("wordlebot/word_lists/officialanswers.js" )
+guess_list_path = ("word_lists/officialguesses.js" )
+answer_list_path = ("word_lists/officialanswers.js" )
 guess_list = load_word_list_from_js(guess_list_path)
 answer_list = load_word_list_from_js(answer_list_path)
 
