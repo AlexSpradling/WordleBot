@@ -20,7 +20,7 @@ banner =  """
 ---------------------------------------------------
 """
 
-# Other functions (calculate_entropy, get_next_guess, update_word_list) remain the same
+# Other functions (calculate_entropy, get_neess, update_word_list) remain the same
 
 
 def load_word_list_from_js(file_path):
@@ -40,35 +40,35 @@ def load_word_list_from_js(file_path):
         word_list = eval(array_str)
         return word_list
 
+def get_feedback_pattern(guess, answer):
+    used_indices = set()  # Track used indices in the answer
+    pattern = ['0'] * len(guess)  # Initialize feedback pattern with '0's
+
+    # First pass: Check for correct letters in the correct position
+    for i, (g, a) in enumerate(zip(guess, answer)):
+        if g == a:
+            pattern[i] = '+'
+            used_indices.add(i)
+
+    # Second pass: Check for correct letters in the wrong position
+    for i, g in enumerate(guess):
+        if pattern[i] == '0' and g in answer:
+            # Ensure the letter is not already matched
+            for j, a in enumerate(answer):
+                if g == a and j not in used_indices:
+                    pattern[i] = '-'
+                    used_indices.add(j)
+                    break
+
+    return pattern
 
 def calculate_entropy(guess, answer_list):
-    """
-    Calculates the entropy of the guess based on the answer list.
-
-    Entropy is calculated as the sum of the product of the probability of each feedback pattern and the log of the probability.
-
-    :param guess: The guess to calculate the entropy for.
-    :param answer_list: The list of possible answers.
-    :return: The entropy of the guess.
-
-    """
-    # explanation of entropy: https://www.youtube.com/watch?v=ErfnhcEV1O8
-
-
     # Dictionary to hold counts of each feedback pattern
     pattern_counts = {}
 
     # Generate feedback patterns for each word in the answer list
     for answer in answer_list:
-        pattern = []
-        for g, a in zip(guess, answer):
-            if g == a:
-                pattern.append('+')  # Correct letter and position
-            elif g in answer:
-                pattern.append('-')  # Correct letter, wrong position
-            else:
-                pattern.append('0')  # Incorrect letter
-        pattern = tuple(pattern)
+        pattern = tuple(get_feedback_pattern(guess, answer))
         pattern_counts[pattern] = pattern_counts.get(pattern, 0) + 1
 
     # Calculate entropy based on the frequency of each pattern
@@ -77,47 +77,58 @@ def calculate_entropy(guess, answer_list):
     for count in pattern_counts.values():
         probability = count / total_patterns
         entropy -= probability * math.log(probability, 2)
-        # guess, probability, entropy
-        print(f'{guess}, p:{probability}, e:{entropy}')
+
     return entropy
 
+
 def refine_guess_list(guess_list, current_guess, feedback):
-    """
-    Refine the guess list based on feedback.
-    """
     refined_list = []
+
     for word in guess_list:
+        remaining_letters = list(word)  # Track remaining letters
         match = True
-        for i in range(len(current_guess)):
+
+        # First Pass: Correctly Placed Letters
+        for i, letter in enumerate(current_guess):
             if feedback[i] == '+':
-                if word[i] != current_guess[i]:
+                if word[i] != letter:
                     match = False
                     break
-            elif feedback[i] == '-':
-                if current_guess[i] == word[i] or current_guess[i] not in word:
+                remaining_letters.remove(letter)  # Remove matched letter
+
+        if not match:
+            continue
+
+        # Second Pass: Misplaced Letters
+        for i, letter in enumerate(current_guess):
+            if feedback[i] == '-':
+                if letter not in remaining_letters or letter == word[i]:
                     match = False
                     break
-            elif feedback[i] == '0':
-                if current_guess[i] in word:
-                    match = False
-                    break
+                remaining_letters.remove(letter)  # Remove matched letter
+            elif feedback[i] == '0' and letter in remaining_letters:
+                match = False
+                break
+
         if match:
             refined_list.append(word)
 
     return refined_list
 
 
-
 def get_next_guess(guess_list, answer_list, current_guess=None, feedback=None):
+    
     if current_guess and feedback:
         # Refine the guess list based on feedback
         refined_guess_list = refine_guess_list(guess_list, current_guess, feedback)
-        # If the refined list is empty, return a random guess from the original list
-        if not refined_guess_list:
-            return random.choice(guess_list)
+       
     else:
         refined_guess_list = guess_list
 
+    if not refined_guess_list:
+    
+        return None
+    
     # Calculate entropy for each word in the refined list
     entropies = {guess: calculate_entropy(guess, answer_list) for guess in refined_guess_list}
 
@@ -131,105 +142,100 @@ def get_next_guess(guess_list, answer_list, current_guess=None, feedback=None):
     # If there are no valid guesses, return the guess with the highest entropy from the refined list
     return max(entropies, key=entropies.get)
 
+
+
 def update_word_list(current_guess, feedback, word_list):
     new_word_list = []
+
     for word in word_list:
+        remaining_letters = list(word)  # Track remaining letters
         match = True
-        for i in range(len(current_guess)):
+
+        # First Pass: Correctly Placed Letters
+        for i, letter in enumerate(current_guess):
             if feedback[i] == '+':
-                # Letter must be in the correct position
-                if word[i] != current_guess[i]:
+                if word[i] != letter:
                     match = False
                     break
-            elif feedback[i] == '-':
-                # Letter must be in the word but not in this position
-                if current_guess[i] == word[i] or current_guess[i] not in word:
+                remaining_letters.remove(letter)  # Remove matched letter
+
+        if not match:
+            continue
+
+        # Second Pass: Misplaced Letters
+        for i, letter in enumerate(current_guess):
+            if feedback[i] == '-':
+                if letter not in remaining_letters:
                     match = False
                     break
-            elif feedback[i] == '0':
-                # Letter must not be in the word
-                if current_guess[i] in word:
-                    match = False
-                    break
+                remaining_letters.remove(letter)  # Remove matched letter
+            elif feedback[i] == '0' and letter in remaining_letters:
+                match = False
+                break
+
         if match:
             new_word_list.append(word)
+
     return new_word_list
 
 
-guess_list_path = ("word_lists/officialguesses.js" )
-answer_list_path = ("word_lists/officialanswers.js" )
-guess_list = load_word_list_from_js(guess_list_path)
-answer_list = load_word_list_from_js(answer_list_path)
+def play_wordle(guess_list, answer_list):
+    # Create a prompt session
+    session = PromptSession()
 
-
-# Create a prompt session
-session = PromptSession()
-
-# Main CLI loop
-current_guess = None
-feedback = None
-
-print(banner)
-print("Welcome to WordleBot!, a Wordle solver.")
-print('')
-
-while True:
-    if current_guess is None:
-        # Prompt the user for the initial guess
-        current_guess = session.prompt("Enter your initial guess (we recommend RAISE): ", ).strip().upper()
-    else:
-        # Suggest the next guess based on previous feedback
-        next_guess = get_next_guess(guess_list, answer_list, current_guess, feedback)
-        print_formatted_text(HTML(f"Suggested guess: <b>{next_guess}</b>"), )
-        current_guess = next_guess
-
-    feedback = session.prompt("Enter feedback (e.g., '+-00+') or 'exit' to quit: ", ).strip().lower()
-
-    if feedback == 'exit':
-        break
-
-    if len(feedback) != len(current_guess):
-        print("Invalid feedback length. Please try again.")
-        continue
-
-    guess_list = refine_guess_list(guess_list, current_guess, feedback)
-
-    # Debugging: Output the size of the answer list before and after update
-    print(f"Size of answer list before update: {len(answer_list)}")
-    answer_list = update_word_list(current_guess, feedback, answer_list)
-    print(f"Size of answer list after update: {len(answer_list)}")
-
-    if feedback == '+++++':
-        print("Congratulations! The word has been guessed correctly.")
-        break
-
-    if not answer_list:
-        print("No more possible answers. Please check the feedback.")
-        break 
-
-
-def simulate_wordle(answer, guess_list, answer_list):
+    # Main CLI loop
     current_guess = None
+    feedback = None
+
+    while True:
+        if current_guess is None:
+            # Prompt the user for the initial guess
+            current_guess = session.prompt("Enter your initial guess (we recommend RAISE): ", ).strip().upper()
+        else:
+            # Suggest the next guess based on previous feedback
+            next_guess = get_next_guess(guess_list, answer_list, current_guess, feedback)
+            print_formatted_text(HTML(f"Suggested guess: <b>{next_guess}</b>"), )
+            current_guess = next_guess
+
+        feedback = session.prompt("Enter feedback (e.g., '+-00+') or 'exit' to quit: ", ).strip().lower()
+
+        if feedback == 'exit':
+            break
+
+        if len(feedback) != len(current_guess):
+            print("Invalid feedback length. Please try again.")
+            continue
+
+        guess_list = refine_guess_list(guess_list, current_guess, feedback)
+
+        # Debugging: Output the size of the answer list before and after update
+        print(f"Size of answer list before update: {len(answer_list)}")
+       
+        print('BEFORE', answer_list)
+        answer_list = update_word_list(current_guess, feedback, answer_list)
+
+        print(f"Size of answer list after update: {len(answer_list)}")
+        print('AFTER', answer_list)
+
+        if feedback == '+++++':
+            print("Congratulations! The word has been guessed correctly.")
+            break
+
+        if not answer_list:
+            print("No more possible answers. Please check the feedback.")
+            break 
+
+def simulate_wordle(answer, original_guess_list, answer_list):
+    current_guess = "SALET" if "SALET" in original_guess_list else random.choice(original_guess_list)
     feedback = None
     num_guesses = 0
 
-    # Start with a strong initial guess
-    current_guess = "RAISE" if "RAISE" in guess_list else random.choice(guess_list)
+    # Create a fresh copy of the guess list for this simulation
+    guess_list = original_guess_list
 
     while True:
         num_guesses += 1
-
-        # Generate feedback based on the answer
-        feedback = ''
-        for g, a in zip(current_guess, answer):
-            if g == a:
-                feedback += '+'
-            elif g in answer:
-                feedback += '-'
-            else:
-                feedback += '0'
-
-        # Update the guess list and answer list based on the feedback
+        feedback = ''.join(get_feedback_pattern(current_guess, answer))
         guess_list = refine_guess_list(guess_list, current_guess, feedback)
         answer_list = update_word_list(current_guess, feedback, answer_list)
 
@@ -240,34 +246,48 @@ def simulate_wordle(answer, guess_list, answer_list):
             print(f"Failed to guess the word: {answer}")
             break
 
-        # Use entropy for subsequent guesses
-        current_guess = get_next_guess(guess_list, answer_list, current_guess, feedback)
+        next_guess = get_next_guess(guess_list, answer_list, current_guess, feedback)
+        if next_guess is None:
+            print("No valid next guess available.")
+            break
+        current_guess = next_guess
 
     return num_guesses
 
 
-# # Define the number of simulations you want to run
-# num_simulations = 100  # You can adjust this number
+def simulate_all_wordle_games(guess_list, answer_list):
+    total_guesses = 0
+    total_simulations = len(answer_list)
 
-# # Initialize a variable to keep track of the total number of guesses across all simulations
-# total_guesses = 0
+    for i, word in enumerate(answer_list, 1):
+        # Use a fresh copy of the guess list for each simulation
+        num_guesses = simulate_wordle(word, guess_list, answer_list)
+        total_guesses += num_guesses
+        print(f"Simulation {i}/{total_simulations}: Word='{word}', Number of guesses={num_guesses}")
 
-# # Run the simulations
-# for _ in range(num_simulations):
-#     print(f"Running simulation {_ + 1} of {num_simulations}")
-#     # Randomly select a word from the answer list
-#     random_answer = random.choice(answer_list)
+    average_guesses = total_guesses / total_simulations
+    print(f"Average number of guesses over {total_simulations} simulations: {average_guesses:.2f}")
 
-#     # Simulate the game for this word
-#     num_guesses = simulate_wordle(random_answer, guess_list.copy(), answer_list.copy())
+    return average_guesses
 
-#     print(f"Number of guesses: {num_guesses}")
 
-#     # Add the number of guesses to the total
-#     total_guesses += num_guesses
 
-# # Calculate the average number of guesses
-# average_guesses = total_guesses / num_simulations
+if __name__ == "__main__":
+    guess_list_path = ("word_lists/officialguesses.js" )
+    answer_list_path = ("word_lists/officialanswers.js" )
+    guess_list = load_word_list_from_js(guess_list_path)
+    answer_list = load_word_list_from_js(answer_list_path)
 
-# # Print the result
-# print(f"Average number of guesses over {num_simulations} simulations: {average_guesses}")
+    print(banner)
+    print("Welcome to Wordle!")
+    print("Please select a mode: 1 - Play, 2 - Simulate")
+
+    # play:1 simulate:2
+    mode = int(input("Please select a mode: "))
+    if mode == 1:
+        play_wordle(guess_list=guess_list, answer_list=answer_list)
+    elif mode == 2:
+        simulate_all_wordle_games(guess_list=guess_list, answer_list= answer_list)
+    else:
+        print("Invalid mode. Please try again.")
+    
