@@ -1,5 +1,4 @@
-const officical_answers = 
-[
+official_answers = [
 "ABACK",
 "ABASE",
 "ABATE",

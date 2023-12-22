@@ -1,8 +1,7 @@
 import math
-import random
 from prompt_toolkit import HTML, PromptSession, print_formatted_text
 
-banner =  """
+banner = """
 ---------------------------------------------------
  __      __                   .___.__            
 /  \    /  \ ____ _______   __| _/|  |    ____   
@@ -19,8 +18,6 @@ banner =  """
                     \/                 
 ---------------------------------------------------
 """
-
-# Other functions (calculate_entropy, get_neess, update_word_list) remain the same
 
 
 def load_word_list_from_js(file_path):
@@ -39,6 +36,7 @@ def load_word_list_from_js(file_path):
         # Convert the string representation of the array to a Python list
         word_list = eval(array_str)
         return word_list
+
 
 def get_feedback_pattern(guess, answer):
     used_indices = set()  # Track used indices in the answer
@@ -61,6 +59,7 @@ def get_feedback_pattern(guess, answer):
                     break
 
     return pattern
+
 
 def calculate_entropy(guess, answer_list):
     # Dictionary to hold counts of each feedback pattern
@@ -117,18 +116,14 @@ def refine_guess_list(guess_list, current_guess, feedback):
 
 
 def get_next_guess(guess_list, answer_list, current_guess=None, feedback=None):
-    
     if current_guess and feedback:
         # Refine the guess list based on feedback
         refined_guess_list = refine_guess_list(guess_list, current_guess, feedback)
-       
     else:
         refined_guess_list = guess_list
 
     if not refined_guess_list:
-    
         return None
-    
     # Calculate entropy for each word in the refined list
     entropies = {guess: calculate_entropy(guess, answer_list) for guess in refined_guess_list}
 
@@ -138,13 +133,14 @@ def get_next_guess(guess_list, answer_list, current_guess=None, feedback=None):
     # If there are valid guesses, return the one with the highest entropy
     if valid_guesses:
         return max(valid_guesses, key=entropies.get)
-    
     # If there are no valid guesses, return the guess with the highest entropy from the refined list
     return max(entropies, key=entropies.get)
 
 
-
 def update_word_list(current_guess, feedback, word_list):
+    """
+    Update the word list based on the current guess and feedback.
+    """
     new_word_list = []
 
     for word in word_list:
@@ -180,6 +176,9 @@ def update_word_list(current_guess, feedback, word_list):
 
 
 def play_wordle(guess_list, answer_list):
+    """
+    Play a game of Wordle.
+    """
     # Create a prompt session
     session = PromptSession()
 
@@ -210,7 +209,6 @@ def play_wordle(guess_list, answer_list):
 
         # Debugging: Output the size of the answer list before and after update
         print(f"Size of answer list before update: {len(answer_list)}")
-       
         print('BEFORE', answer_list)
         answer_list = update_word_list(current_guess, feedback, answer_list)
 
@@ -223,10 +221,11 @@ def play_wordle(guess_list, answer_list):
 
         if not answer_list:
             print("No more possible answers. Please check the feedback.")
-            break 
+            break
 
-def simulate_wordle(answer, original_guess_list, answer_list):
-    current_guess = "SALET" if "SALET" in original_guess_list else random.choice(original_guess_list)
+
+def simulate_wordle(current_guess, answer, original_guess_list, answer_list):
+    # current_guess = "SALET" if "SALET" in original_guess_list else random.choice(original_guess_list)
     feedback = None
     num_guesses = 0
 
@@ -255,13 +254,13 @@ def simulate_wordle(answer, original_guess_list, answer_list):
     return num_guesses
 
 
-def simulate_all_wordle_games(guess_list, answer_list):
+def simulate_all_wordle_games(current_guess, guess_list, answer_list):
     total_guesses = 0
     total_simulations = len(answer_list)
 
     for i, word in enumerate(answer_list, 1):
         # Use a fresh copy of the guess list for each simulation
-        num_guesses = simulate_wordle(word, guess_list, answer_list)
+        num_guesses = simulate_wordle(current_guess, word, guess_list, answer_list)
         total_guesses += num_guesses
         print(f"Simulation {i}/{total_simulations}: Word='{word}', Number of guesses={num_guesses}")
 
@@ -271,13 +270,13 @@ def simulate_all_wordle_games(guess_list, answer_list):
     return average_guesses
 
 
-
 if __name__ == "__main__":
-    guess_list_path = ("word_lists/officialguesses.js" )
-    answer_list_path = ("word_lists/officialanswers.js" )
-    guess_list = load_word_list_from_js(guess_list_path)
-    answer_list = load_word_list_from_js(answer_list_path)
-
+    GUESS_LIST_PATH = ("word_lists/officialanswers.py")
+    ANSWER_LIST_PATH = ("word_lists/officialanswers.py")
+    guess_list = load_word_list_from_js(GUESS_LIST_PATH)
+    answer_list = load_word_list_from_js(ANSWER_LIST_PATH)
+    # answer_list = original_answers
+    # guess_list = official_guesses
     print(banner)
     print("Welcome to Wordle!")
     print("Please select a mode: 1 - Play, 2 - Simulate")
@@ -287,7 +286,6 @@ if __name__ == "__main__":
     if mode == 1:
         play_wordle(guess_list=guess_list, answer_list=answer_list)
     elif mode == 2:
-        simulate_all_wordle_games(guess_list=guess_list, answer_list= answer_list)
+        simulate_all_wordle_games("SALET", guess_list=guess_list, answer_list= answer_list)
     else:
         print("Invalid mode. Please try again.")
-    

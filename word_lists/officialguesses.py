@@ -1,5 +1,4 @@
-const official_guesses = 
-[
+official_guesses = [
 "AAHED",
 "AALII",
 "AAPAS",
