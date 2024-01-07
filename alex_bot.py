@@ -14,7 +14,7 @@ banner = """
 """
 
 
-def load_word_list_from_js(file_path):
+def load_word_list_from_py(file_path):
     """
     Load the word list from a JavaScript file containing an array of words.
 
@@ -124,7 +124,7 @@ def get_next_guess(guess_list, answer_list, current_guess=None, feedback=None):
     }
 
     # Prioritize guesses that are also in the answer list
-    valid_guesses = [guess for guess in entropies if guess in answer_list]
+    valid_guesses = [guess for guess in entropies]
 
     # If there are valid guesses, return the one with the highest entropy
     if valid_guesses:
@@ -289,8 +289,8 @@ def simulate_all_wordle_games(current_guess, guess_list, answer_list):
 if __name__ == "__main__":
     GUESS_LIST_PATH = "word_lists/officialanswers.py"
     ANSWER_LIST_PATH = "word_lists/officialanswers.py"
-    guess_list = load_word_list_from_js(GUESS_LIST_PATH)
-    answer_list = load_word_list_from_js(ANSWER_LIST_PATH)
+    guess_list = load_word_list_from_py(GUESS_LIST_PATH)
+    answer_list = load_word_list_from_py(ANSWER_LIST_PATH)
     # answer_list = original_answers
     # guess_list = official_guesses
     print(banner)
