@@ -1,4 +1,4 @@
-official_answers = [
+const officialAnswers = [
     "ABACK",
     "ABASE",
     "ABATE",
@@ -2315,3 +2315,5 @@ official_answers = [
     "ZESTY",
     "ZONAL",
 ]
+
+console.log("officialAnswers loaded", officialAnswers);

@@ -1,4 +1,4 @@
-official_guesses = [
+const officialGuesses = [
     "AAHED",
     "AALII",
     "AAPAS",

@@ -2,21 +2,15 @@ import math
 from prompt_toolkit import HTML, PromptSession, print_formatted_text
 
 banner = """
----------------------------------------------------
- __      __                   .___.__            
-/  \    /  \ ____ _______   __| _/|  |    ____   
-\   \/\/   //  _ \\_  __ \ / __ | |  |  _/ __ \  
- \        /(  <_> )|  | \// /_/ | |  |__\  ___/  
-  \__/\  /  \____/ |__|   \____ | |____/ \___ > 
-       \/                      \/            \/  
-                                                 
-            __________          __               
-            \______   \  ____ _/  |_             
-             |    |  _/ /  _ \\   __\            
-             |    |   \(  <_> )|  |              
-             |______  / \____/ |__|              
-                    \/                 
----------------------------------------------------
+                     ___  _          ______       _                     
+                    / _ \| |         | ___ \     | |                    
+                   / /_\ \ | _____  _| |_/ / ___ | |_                   
+                   |  _  | |/ _ \ \/ / ___ \/ _ \| __|                  
+                   | | | | |  __/>  <| |_/ / (_) | |_                   
+                   \_| |_/_|\___/_/\_\____/ \___/ \__|                  
+ ______ ______ ______                              ______ ______ ______ 
+|______|______|______|                            |______|______|______|      
+
 """
 
 
@@ -40,21 +34,21 @@ def load_word_list_from_js(file_path):
 
 def get_feedback_pattern(guess, answer):
     used_indices = set()  # Track used indices in the answer
-    pattern = ['0'] * len(guess)  # Initialize feedback pattern with '0's
+    pattern = ["0"] * len(guess)  # Initialize feedback pattern with '0's
 
     # First pass: Check for correct letters in the correct position
     for i, (g, a) in enumerate(zip(guess, answer)):
         if g == a:
-            pattern[i] = '+'
+            pattern[i] = "+"
             used_indices.add(i)
 
     # Second pass: Check for correct letters in the wrong position
     for i, g in enumerate(guess):
-        if pattern[i] == '0' and g in answer:
+        if pattern[i] == "0" and g in answer:
             # Ensure the letter is not already matched
             for j, a in enumerate(answer):
                 if g == a and j not in used_indices:
-                    pattern[i] = '-'
+                    pattern[i] = "-"
                     used_indices.add(j)
                     break
 
@@ -89,7 +83,7 @@ def refine_guess_list(guess_list, current_guess, feedback):
 
         # First Pass: Correctly Placed Letters
         for i, letter in enumerate(current_guess):
-            if feedback[i] == '+':
+            if feedback[i] == "+":
                 if word[i] != letter:
                     match = False
                     break
@@ -100,12 +94,12 @@ def refine_guess_list(guess_list, current_guess, feedback):
 
         # Second Pass: Misplaced Letters
         for i, letter in enumerate(current_guess):
-            if feedback[i] == '-':
+            if feedback[i] == "-":
                 if letter not in remaining_letters or letter == word[i]:
                     match = False
                     break
                 remaining_letters.remove(letter)  # Remove matched letter
-            elif feedback[i] == '0' and letter in remaining_letters:
+            elif feedback[i] == "0" and letter in remaining_letters:
                 match = False
                 break
 
@@ -125,7 +119,9 @@ def get_next_guess(guess_list, answer_list, current_guess=None, feedback=None):
     if not refined_guess_list:
         return None
     # Calculate entropy for each word in the refined list
-    entropies = {guess: calculate_entropy(guess, answer_list) for guess in refined_guess_list}
+    entropies = {
+        guess: calculate_entropy(guess, answer_list) for guess in refined_guess_list
+    }
 
     # Prioritize guesses that are also in the answer list
     valid_guesses = [guess for guess in entropies if guess in answer_list]
@@ -149,7 +145,7 @@ def update_word_list(current_guess, feedback, word_list):
 
         # First Pass: Correctly Placed Letters
         for i, letter in enumerate(current_guess):
-            if feedback[i] == '+':
+            if feedback[i] == "+":
                 if word[i] != letter:
                     match = False
                     break
@@ -160,12 +156,12 @@ def update_word_list(current_guess, feedback, word_list):
 
         # Second Pass: Misplaced Letters
         for i, letter in enumerate(current_guess):
-            if feedback[i] == '-':
+            if feedback[i] == "-":
                 if letter not in remaining_letters:
                     match = False
                     break
                 remaining_letters.remove(letter)  # Remove matched letter
-            elif feedback[i] == '0' and letter in remaining_letters:
+            elif feedback[i] == "0" and letter in remaining_letters:
                 match = False
                 break
 
@@ -189,16 +185,32 @@ def play_wordle(guess_list, answer_list):
     while True:
         if current_guess is None:
             # Prompt the user for the initial guess
-            current_guess = session.prompt("Enter your initial guess (we recommend RAISE): ", ).strip().upper()
+            current_guess = (
+                session.prompt(
+                    "Enter your initial guess: ",
+                )
+                .strip()
+                .upper()
+            )
         else:
             # Suggest the next guess based on previous feedback
-            next_guess = get_next_guess(guess_list, answer_list, current_guess, feedback)
-            print_formatted_text(HTML(f"Suggested guess: <b>{next_guess}</b>"), )
+            next_guess = get_next_guess(
+                guess_list, answer_list, current_guess, feedback
+            )
+            print_formatted_text(
+                HTML(f"Suggested guess: <b>{next_guess}</b>"),
+            )
             current_guess = next_guess
 
-        feedback = session.prompt("Enter feedback (e.g., '+-00+') or 'exit' to quit: ", ).strip().lower()
+        feedback = (
+            session.prompt(
+                "Enter feedback (+ = Right letter, right place. - = letter in word, wrong position, 0 = not in word) or 'exit' to quit: ",
+            )
+            .strip()
+            .lower()
+        )
 
-        if feedback == 'exit':
+        if feedback == "exit":
             break
 
         if len(feedback) != len(current_guess):
@@ -209,13 +221,13 @@ def play_wordle(guess_list, answer_list):
 
         # Debugging: Output the size of the answer list before and after update
         print(f"Size of answer list before update: {len(answer_list)}")
-        print('BEFORE', answer_list)
+        print("BEFORE", answer_list)
         answer_list = update_word_list(current_guess, feedback, answer_list)
 
         print(f"Size of answer list after update: {len(answer_list)}")
-        print('AFTER', answer_list)
+        print("AFTER", answer_list)
 
-        if feedback == '+++++':
+        if feedback == "+++++":
             print("Congratulations! The word has been guessed correctly.")
             break
 
@@ -234,11 +246,11 @@ def simulate_wordle(current_guess, answer, original_guess_list, answer_list):
 
     while True:
         num_guesses += 1
-        feedback = ''.join(get_feedback_pattern(current_guess, answer))
+        feedback = "".join(get_feedback_pattern(current_guess, answer))
         guess_list = refine_guess_list(guess_list, current_guess, feedback)
         answer_list = update_word_list(current_guess, feedback, answer_list)
 
-        if feedback == '+++++':
+        if feedback == "+++++":
             break
 
         if not answer_list:
@@ -262,30 +274,40 @@ def simulate_all_wordle_games(current_guess, guess_list, answer_list):
         # Use a fresh copy of the guess list for each simulation
         num_guesses = simulate_wordle(current_guess, word, guess_list, answer_list)
         total_guesses += num_guesses
-        print(f"Simulation {i}/{total_simulations}: Word='{word}', Number of guesses={num_guesses}")
+        print(
+            f"Simulation {i}/{total_simulations}: Word='{word}', Number of guesses={num_guesses}"
+        )
 
     average_guesses = total_guesses / total_simulations
-    print(f"Average number of guesses over {total_simulations} simulations: {average_guesses:.2f}")
+    print(
+        f"Average number of guesses over {total_simulations} simulations: {average_guesses:.2f}"
+    )
 
     return average_guesses
 
 
 if __name__ == "__main__":
-    GUESS_LIST_PATH = ("word_lists/officialanswers.py")
-    ANSWER_LIST_PATH = ("word_lists/officialanswers.py")
+    GUESS_LIST_PATH = "word_lists/officialanswers.py"
+    ANSWER_LIST_PATH = "word_lists/officialanswers.py"
     guess_list = load_word_list_from_js(GUESS_LIST_PATH)
     answer_list = load_word_list_from_js(ANSWER_LIST_PATH)
     # answer_list = original_answers
     # guess_list = official_guesses
     print(banner)
-    print("Welcome to Wordle!")
-    print("Please select a mode: 1 - Play, 2 - Simulate")
+    print("Welcome to the Wordle Bot!")
+    print(
+        "Please select a mode: 1 - Play, 2 - Run Simulations (This will take a while)"
+    )
 
     # play:1 simulate:2
     mode = int(input("Please select a mode: "))
     if mode == 1:
         play_wordle(guess_list=guess_list, answer_list=answer_list)
     elif mode == 2:
-        simulate_all_wordle_games("SALET", guess_list=guess_list, answer_list= answer_list)
+        input_word = input("Please enter a word to simulate: ").upper()
+        print("Simulating all Wordle games using the word: ", input_word)
+        simulate_all_wordle_games(
+            input_word, guess_list=guess_list, answer_list=answer_list
+        )
     else:
         print("Invalid mode. Please try again.")

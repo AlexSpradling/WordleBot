@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wordle Game</title>
+    <style>
+        /* CSS styles for the game */
+        .feedback-container {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        .feedback-block {
+            width: 20px;
+            height: 20px;
+            margin: 2px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+        }
+        .correct { background-color: green; }
+        .present { background-color: yellow; }
+        .absent { background-color: grey; }
+    </style>
+</head>
+<body>
+    <h1>Wordle Game</h1>
+    <input type="text" id="guessInput" placeholder="Enter guess" maxlength="5">
+    <button onclick="submitGuess()">Submit Guess</button>
+    <button onclick="resetGame()">Reset Game</button>
+    <div id="guesses"></div>
+
+    <!-- JavaScript files -->
+    <!-- Ensure these script files are correctly located in your project -->
+    <script src="officialguesses.js"></script>
+    <script src="officialanswers.js"></script>
+    <script src="wordle.js"></script>
+</body>
+</html>
