@@ -1,29 +1,33 @@
 # WORDLE BOT!
-author: Alex Spradling
+Author: Alex Spradling
 
 ---
 
 # Introduction
 
-A lot of folks have done this, and probably done it better, but this is how I did it. 
+A lot of folks have done this, and probably done it better [most notably 3blue1brown!](https://www.3blue1brown.com/lessons/wordle), but this is how I did it. 
 
-This package consists of a script for running the WORDLE bot and a Jupyter Notebook that walks the reader through building a WORDLE bot algorithm from the ground up. The final WORDLE bot solves all WORDLE problems in 3.57 guesses on average which is very close to the "mathematically optimal" solution. 
+This package consists of a script for running `AlexBot` a WORDLE bot, and a Jupyter Notebook that walks the reader through building a WORDLE bot algorithm from the ground up. The datasets have shifted a bit since WORDLE's initial release, but the final `AlexBot` uses the starting word `SALET` and solves all WORDLE words in the answer set with a mean score of 3.57 guesses -- which is very close to the "mathematically optimal" solution. 
 
 I'm happy enough with the results and happier to share them with you. So here we go, here's how you build a WORDLE bot that is pretty good. 
 
 ## Package Content
 1. [AlexBot - A pretty good WORDLE bot](alex_bot.py)
-2. [How to make a WORDLE bot - A jupyter notebook stepping you through the entire process](entropy_notebook.ipynb)
+2. [How to make a WORDLE bot - A Jupyter Notebook stepping you through the entire process](entropy_notebook.ipynb)
 3. [Words - The data I'm using](word_lists)
 ---
 # Application
 
 The WORDLE bot can be used in two ways:
-1. You can play WORDLE with it, enter your chosen starting word and then encode the feedback as either `+` for the right letter in the right place, `-` for a correct letter in  wrong place, or `0` as a letter that is not in the word. The bot sill suggest the next word and so on. 
+1. You can play WORDLE with it, enter your chosen starting word and then encode the feedback as either `+` for the right letter in the right place, `-` for a correct letter in  wrong place, or `0` for a letter that is not in the word -- you'll end up entering a string that looks something like `00-++`. Enter the feedback and the bot sill suggest the next word and so on. 
 
 2. You can evaluate a word choice -- enter the word you'd like to evaluate, and the bot will iterate through the entire WORDLE answer list using your word as the starting word. It will return the mean number of guesses for the whole set. 
 
 # How it works
+
+*(The following is excerpted text from the Jupyter Notebook. The notebook implements the algorithm from scratch, providing many intuition building examples along the way!)*
+
+---
 
 The heart of algorithm is based on INFORMATIONAL ENTROPY, which at its core is just some 9th grade math applied in a very clever way.
 
