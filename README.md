@@ -5,7 +5,7 @@ Author: Alex Spradling
 
 # Introduction
 
-A lot of folks have done this, and probably done it better [most notably 3blue1brown!](https://www.3blue1brown.com/lessons/wordle), but this is how I did it. 
+A lot of folks have done this, and probably done it better ([most notably 3blue1brown!](https://www.3blue1brown.com/lessons/wordle)), but this is how I did it. 
 
 This package consists of a script for running `AlexBot` a WORDLE bot, and a Jupyter Notebook that walks the reader through building a WORDLE bot algorithm from the ground up. The datasets have shifted a bit since WORDLE's initial release, but the final `AlexBot` uses the starting word `SALET` and solves all WORDLE words in the answer set with a mean score of 3.57 guesses -- which is very close to the "mathematically optimal" solution. 
 
