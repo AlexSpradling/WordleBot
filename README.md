@@ -65,8 +65,11 @@ $$ H(X) = -\sum_{i=1}^{n} P(x_i) \log_2 P(x_i) $$
 For a fair coin (H for Heads, T for Tails), each with a probability of 0.5:
 
 $$ H(X) = -[P(H) \log_2 P(H) + P(T) \log_2 P(T)] $$
+
 $$ H(X) = -[0.5 \log_2 0.5 + 0.5 \log_2 0.5] $$
+
 $$ H(X) = -[-0.5 - 0.5] $$
+
 $$ H(X) = 1 \text{ bit} $$
 
 So, we see that as defined above, 1 piece of information is an event with a binary outcome, I tell you I've got Heads, and since you know that we have an equal probability of getting Tails you can eliminate the uncertainty that the coin could be showing tails. That's the information you just gained. 
@@ -136,9 +139,13 @@ Back to the coins. What if the coin was *not* fair, it's loaded and it will come
 Let's do the math again, we'll say that heads comes up 70% of the time with my new fixed coin.
 
 $$ H(X) = -[P_1 \log_2 P_1 + P_2 \log_2 P_2] $$
+
 $$ H(X) = -[0.7 \log_2 0.7 + 0.3 \log_2 0.3] $$
+
 $$ H(X) = -[0.7 \times -0.5146 + 0.3 \times -1.7370] $$
+
 $$ H(X) = -[-0.3602 - 0.5211] $$
+
 $$ H(X) \approx 0.8813 \text{ bits} $$
 
 I've rigged the results and you are less surprised and therefore less informed by the results of the coin flip, we can see that the calculated information is now $.88$ bits where it was once $1$ when we had a fair coin. 
